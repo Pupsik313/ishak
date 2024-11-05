@@ -1,0 +1,39 @@
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local gameId = 7239319209
+local visitedServers = {}
+
+local function teleportToMoneyPrinter()
+	local moneyPrinter = workspace:FindFirstChild("money printer", true)
+	if moneyPrinter then
+		LocalPlayer.Character:SetPrimaryPartCFrame(moneyPrinter.CFrame)
+		local proximityPrompt = moneyPrinter:FindFirstChildOfClass("ProximityPrompt")
+		if proximityPrompt then
+			proximityPrompt:InputHoldBegin()
+			task.wait(1) -- Hold for 1 second
+			proximityPrompt:InputHoldEnd()
+		end
+	else
+		serverHop()
+	end
+end
+
+local function serverHop()
+	local currentServerId = game.JobId
+	table.insert(visitedServers, currentServerId)
+	local servers = TeleportService:GetPlayerPlaceInstanceAsync(gameId)
+	for _, server in servers do
+		if not table.find(visitedServers, server.Id) then
+			TeleportService:TeleportToPlaceInstance(gameId, server.Id, LocalPlayer)
+			return
+		end
+	end
+end
+
+local function joinGame()
+	TeleportService:Teleport(gameId, LocalPlayer)
+end
+
+joinGame()
+teleportToMoneyPrinter()
